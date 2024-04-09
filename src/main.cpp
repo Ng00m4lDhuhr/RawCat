@@ -1,7 +1,5 @@
 // Main source code file
 #include "rawcat.h"
-#include <iostream>
-
 
 int main(int argc, char* argv[]){
 	// Here we are to handle the CLI of user
