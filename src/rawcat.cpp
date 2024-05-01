@@ -1,7 +1,7 @@
 // Additional source files if needed
 #include "rawcat.h"
 
-const char* test(void){ return "Compiling script works"; }
+const char* test(void){ return "(+) Compiling script works"; }
 
 struct Interface
 {
@@ -24,38 +24,49 @@ struct Interface
 	Interface ( void ) { memset( this, 0 , sizeof(*this) ); }
 };
 
-bool InterfaceHook(Interface& device, int sockfd)
+bool InterfaceHook ( Interface& device, int sockfd )
 {
 	struct sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = device.address;
 
-	if (bind (sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0)
-	{
-		std::cerr << "(x) Failed to hook on interface" << device.name << std::endl ;
+	if ( // bind the socket to a specific IP address and Interface
+		setsockopt( sockfd, SOL_SOCKET, SO_BINDTODEVICE, device.name, strlen(device.name) ) < 0 
+	){	// dependency fail condition	
+		std::cerr	<<	"(x) Failed to hook on interface"
+					<<	device.name << std::endl ;
 		return false;
 	}
 	return true;
 }
 
-int InterfaceHook(Interface& device)
+int InterfaceHook ( Interface& device )
 {
 	int sockfd = socket( AF_INET, SOCK_RAW, IPPROTO_RAW );
 	if (sockfd < 0)
-	{
-		std::cerr << "(x) Failed to create a raw socket" << std::endl;
-		return -1;
+	{	// Failure condition
+		std::cerr	<<	"(x) Failed to create a raw socket" 
+					<<	std::endl;
+		return sockfd;
 	}
 	if ( InterfaceHook (device, sockfd) ) return sockfd;
 	else { close(sockfd); return -1 ;}
 }
 
-int capture( BYTE &buffer )
-{
-	// clear buffer before any modification
-	memset(&buffer, 0, sizeof(buffer));
-	// TODO a loop to receive data till buffer is consumed
-	return sizeof(buffer);
+// captures an IP packet from a device 
+// into the said buffer and return it's size
+int capture ( Interface device, void* buffer, size_t size)
+{	// clear buffer before any modification
+	memset( buffer, 0, size );
+	// TODO read from a raw socket into buffer
+	return 1;
 }
 
-bool release(BYTE &buffer){ return false; }
+// captures N size bytes from X interface
+void* capture ( Interface device, size_t size )
+{	// create a memory buffer and return it	
+	void* buffer = malloc(size);
+	capture(device, buffer, size);
+	return buffer;
+}
+

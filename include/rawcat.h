@@ -14,10 +14,17 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
+#include <string>
 
-using BYTE = uint8_t;
+using byte = uint8_t;
 
 // testing function only
 const char* test(void);
-
+/*
+bool InterfaceHook ( Interface& device, int sockfd );
+int InterfaceHook ( Interface& device );
+int capture ( Interface device, void* buffer, size_t size);
+void* capture ( Interface device, size_t size );
+*/
 #endif
+
